@@ -2,9 +2,10 @@
 import { forwardRef, ReactNode, useImperativeHandle, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 type SearchInputProps = {
-  label?: string;
+  placeholder?: string;
   onSearch: (str: string) => void;
   searchIcon?: ReactNode;
 };
@@ -13,7 +14,7 @@ export type SearchInputHandle = {
 };
 
 const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
-  ({ searchIcon, label, onSearch }, ref) => {
+  ({ searchIcon,  placeholder, onSearch }, ref) => {
     const scaleProgress = useSharedValue(0);
     const inputRef = useRef<TextInput>(null);
     const [str, setStr] = useState('');
@@ -36,7 +37,7 @@ const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
           value={str}
           selectTextOnFocus={false}
           selectionColor="#26AB47"
-          placeholder={label}
+          placeholder={  placeholder}
           className="h-[44px] w-[100px] flex-1 rounded-[12px] bg-[#F2F2F2] px-[10px]"
           onChangeText={(text) => {
             if (text.trim()) {
@@ -59,7 +60,7 @@ const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
                 inputRef.current?.blur();
                 if (str && str.trim().length > 0) onSearch(str);
               }}>
-        
+           <FontAwesome6 name="searchengin" size={24} color="#6EB3A0" />
             </Pressable>
           </Animated.View>
         )}
