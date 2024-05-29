@@ -250,15 +250,8 @@ const MusicPlayer = () => {
 //       };
 //     });
 //   };
-  const init = async () => {
-    await Audio.setAudioModeAsync({
-      staysActiveInBackground: true,
-    });
-  };
 
-  useEffect(() => {
-    init();
-  }, []);
+
 
   useEffect(() => {
     if (!currentMusic) return;

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {  Audio } from 'expo-av';
 
 export type MusicInfo = {
@@ -11,7 +11,12 @@ export type MusicInfo = {
 const useMusicAudio = () => {
     const audioRef = useRef(new Audio.Sound()).current
     const [musicInfo, setMusicInfo] = useState<MusicInfo>()
-    const changeMusicInfo =setMusicInfo
+    const changeMusicInfo = setMusicInfo
+    useEffect(() => {
+         Audio.setAudioModeAsync({
+      staysActiveInBackground: true,
+    });
+     },[])
     return {
         audio: audioRef,
         musicInfo,
