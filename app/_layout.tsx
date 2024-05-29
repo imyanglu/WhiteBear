@@ -6,6 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
 import { Text } from 'react-native';
+import { MusicPlayer } from '@/components';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -48,10 +50,13 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{headerShown: false}}>
+      <GestureHandlerRootView>
+      <Stack screenOptions={{headerShown: false}}>
         <Slot />
-    </Stack>
-    
+      </Stack>
+      <MusicPlayer/>
+ </GestureHandlerRootView>
+  
     </ThemeProvider>
   );
 }

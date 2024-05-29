@@ -2,14 +2,16 @@ import { useAtom } from 'jotai';
 
 import { MusicAtom } from '@/components/MusicPlayer';
 import { Music } from '@/type';
+import useMusicAudio from './useAudio';
 
 const useMusicPlayer = () => {
+  const { audio,musicInfo} = useMusicAudio()
   const [musicsAtom, setMusicsAtom] = useAtom(MusicAtom);
   const add = (music: Music) => {
     setMusicsAtom((a) => {
-      const songs = a.musics;
-      songs.push(music);
-      const isEmpty = songs.length === 1;
+      const songs = a.songs;
+      songs.set(music.url, music); // 设置播放列表
+      const isEmpty = songs.keys().next().value === undefined;
       return {
         ...a,
         musics: songs,
@@ -23,16 +25,17 @@ const useMusicPlayer = () => {
       return { ...a, isPlaying: false };
     });
   };
-  const play = (music :Music) => {
-    const listIds = musicsAtom.musics.map((a) => a.url);
-    if (listIds.includes(music.url)) {
-      setMusicsAtom((a) => {
+
+  const play = (music: Music) => {
+    const songs = musicsAtom.songs
+    if(songs.has(music.url))
+     setMusicsAtom((a) => {
         return { ...a, playingId: music.url, isPlaying: true };
-      });
-    } else {
+     })
+    else {
       setMusicsAtom((a) => {
-        const songs = a.musics;
-        songs.unshift(music);
+        const songs = a.songs;
+        songs.set(music.url, music);
         return { ...a, musics: songs, isPlaying: true, playingUrl:music.url };
       });
     }
@@ -44,7 +47,6 @@ const useMusicPlayer = () => {
     play,
     pause,
     isPlaying: musicsAtom.isPlaying,
-    list: musicsAtom.musics,
   };
 };
 export default useMusicPlayer;

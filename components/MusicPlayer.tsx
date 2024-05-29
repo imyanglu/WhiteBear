@@ -15,19 +15,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLast } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { Music } from '@/type';
+import useMusicAudio from '@/hooks/useAudio';
 
 const { width } = Dimensions.get('window');
 
 
 
 type MusicPlayerConfig = {
-  musics:Music[];
-    isPlaying: boolean;
+  songs:Map<string,Music>;
+  isPlaying: boolean;
   playingUrl: string;
 };
 
 const DefaultSongs: MusicPlayerConfig = {
-  musics: [],
+  songs: new Map(),
   isPlaying: false,
   playingUrl: '',
 };
@@ -50,6 +51,7 @@ const formatTimeStr = (seconds?: number) => {
 
 const MusicPlayer = () => {
   const { top } = useSafeAreaInsets();
+  const { audio,musicInfo,changeMusicInfo} = useMusicAudio()
 
   const isExpandedProgress = useSharedValue(0);
   const isLongPress = useSharedValue(false);
@@ -58,65 +60,62 @@ const MusicPlayer = () => {
   const songsListHeight = useSharedValue(0);
   const currentDuration = useSharedValue(0);
   const duration = useSharedValue(0);
-  const soundRef = useRef(new Audio.Sound()).current;
+
   const [musicsAtom, setMusicsAtom] = useAtom(MusicAtom);
   const prePlayingIdRef = useRef('');
   const [showCloseModal, setShowCloseModal] = useState(false);
 
-  const currentMusic = useMemo(() => {
-    const currentMusic = musicsAtom?.musics.find((i) => i.url === musicsAtom?.playingUrl);
-    return currentMusic;
+    const currentMusic = useMemo(() => {
+      return musicsAtom.songs.get(musicsAtom.playingUrl);
   }, [musicsAtom]);
 
   const stopMusic = async () => {
-    const data = (await soundRef.getStatusAsync()) as AVPlaybackStatusSuccess;
+    const data = (await audio.getStatusAsync()) as AVPlaybackStatusSuccess;
     const currentMillions = data.positionMillis;
     currentDuration.value = currentMillions / 1000;
     if (currentMillions !== data.durationMillis) {
-      await soundRef.pauseAsync();
+      await audio.pauseAsync();
     } else {
-      await soundRef.stopAsync();
+      await audio.stopAsync();
     }
   };
 
   const continuePlay = async () => {
-    const data = (await soundRef.getStatusAsync()) as AVPlaybackStatusSuccess;
+    const data = (await audio.getStatusAsync()) as AVPlaybackStatusSuccess;
     const duration = data.durationMillis;
     const currentMillions = data.positionMillis;
-    soundRef.setPositionAsync(currentMillions);
-    soundRef.playAsync();
+    audio.setPositionAsync(currentMillions);
+    audio.playAsync();
     currentDuration.value = withTiming(duration ?? 1 / 1000, {
       duration: (duration ?? 9999) - currentMillions,
     });
   };
 
   const clearSongs = async () => {
-    await soundRef.unloadAsync();
-    setMusicsAtom({ musics: [], isPlaying: false, playingUrl: '' });
+    await audio.unloadAsync();
+    setMusicsAtom({ songs: new Map(), isPlaying: false, playingUrl: '' });
   };
 
-  const played = useLast(async () => {
-    const currentUrl = musicsAtom.playingUrl;
-    const musics = musicsAtom.musics;
-    const currentMusics = musics.filter((i) => i.url===currentUrl);
-    if (currentMusics.length === 0) {
+    const playEnded = useLast(async () => {
+      const songs = musicsAtom.songs
+  songs.delete(musicsAtom.playingUrl)
+    if (!songs.keys().next().value) {
       try {
-        await soundRef.unloadAsync();
+        await audio.unloadAsync();
       } catch (err) {}
       clearSongs();
       return;
     }
-
-    setMusicsAtom({ playingUrl: currentMusics[0].url, isPlaying: true, musics: currentMusics });
+    setMusicsAtom({ playingUrl: songs.values().next().value as string, isPlaying: true,songs: new Map(songs) });
   });
 
   const playMusic = async (uri: string) => {
     currentDuration.value = 0;
     duration.value = 0;
     try {
-      await soundRef.unloadAsync();
+      await audio.unloadAsync();
     } catch (err) {}
-    await soundRef.loadAsync({ uri }, { shouldPlay: true }).then((data) => {
+    await audio.loadAsync({ uri }, { shouldPlay: true }).then((data) => {
       prePlayingIdRef.current = musicsAtom.playingUrl;
       const successData = data as AVPlaybackStatusSuccess;
       if (successData.durationMillis) {
@@ -127,15 +126,15 @@ const MusicPlayer = () => {
       }
     });
 
-    soundRef._onPlaybackStatusUpdate = (e) => {
+    audio._onPlaybackStatusUpdate = (e) => {
       const result = e as AVPlaybackStatusSuccess;
       currentDuration.value = result.positionMillis / 1000;
 
       if (!e.isLoaded) return;
       if (e.didJustFinish) {
         prePlayingIdRef.current = '';
-        soundRef.stopAsync();
-        played.current();
+        audio.stopAsync();
+       playEnded.current()
       }
     };
   };
@@ -237,20 +236,20 @@ const MusicPlayer = () => {
     setShowCloseModal(true);
   };
 
-  const removeMusic = (m: MusicPlayerConfig['musics'][number]) => {
-    if (musicsAtom.musics.length === 1) {
-      close();
-    }
-    setMusicsAtom((a) => {
-      const playingId = a.playingUrl;
-      const musics = a.musics.filter((i) => i.url !== m.url);
-      return {
-        ...a,
-        musics: musics,
-        playingId: playingId === a.playingUrl ? musics[0].url : a.playingUrl,
-      };
-    });
-  };
+//   const removeMusic = (m: MusicPlayerConfig['musics'][number]) => {
+//     if (musicsAtom.musics.length === 1) {
+//       close();
+//     }
+//     setMusicsAtom((a) => {
+//       const playingId = a.playingUrl;
+//       const musics = a.musics.filter((i) => i.url !== m.url);
+//       return {
+//         ...a,
+//         musics: musics,
+//         playingId: playingId === a.playingUrl ? musics[0].url : a.playingUrl,
+//       };
+//     });
+//   };
   const init = async () => {
     await Audio.setAudioModeAsync({
       staysActiveInBackground: true,
@@ -272,7 +271,7 @@ const MusicPlayer = () => {
     stopMusic();
   }, [musicsAtom.isPlaying, currentMusic]);
 
-  if (musicsAtom.musics.length < 1) return <></>;
+  if (!musicsAtom.songs.values().next().value) return <></>;
   return (
     <>
       <Animated.View
@@ -338,7 +337,7 @@ const MusicPlayer = () => {
                 <Text>列表</Text>
               </View>
             }
-            data={musicsAtom.musics}
+            data={Array.from(musicsAtom.songs.values())}
             ItemSeparatorComponent={() => <View className='h-[10px]'/>}
             renderItem={({ item }) => (
               <View className="h-[40px]  items-center flex-row px-[8px] ">
@@ -352,7 +351,7 @@ const MusicPlayer = () => {
                 <Pressable
                   className="ml-auto pr-[4px]"
                   onPress={() => {
-                    removeMusic(item);
+                    // removeMusic(item);
                   }}>
                   {/* <Image
                     className="w-[18px] h-[18px]"
