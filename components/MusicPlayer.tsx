@@ -52,7 +52,6 @@ const formatTimeStr = (seconds?: number) => {
 const MusicPlayer = () => {
   const { top } = useSafeAreaInsets();
   const { audio,musicInfo,changeMusicInfo} = useMusicAudio()
-
   const isExpandedProgress = useSharedValue(0);
   const isLongPress = useSharedValue(false);
   const saveTranslateY = useSharedValue(top);
@@ -235,23 +234,6 @@ const MusicPlayer = () => {
   const close = () => {
     setShowCloseModal(true);
   };
-
-//   const removeMusic = (m: MusicPlayerConfig['musics'][number]) => {
-//     if (musicsAtom.musics.length === 1) {
-//       close();
-//     }
-//     setMusicsAtom((a) => {
-//       const playingId = a.playingUrl;
-//       const musics = a.musics.filter((i) => i.url !== m.url);
-//       return {
-//         ...a,
-//         musics: musics,
-//         playingId: playingId === a.playingUrl ? musics[0].url : a.playingUrl,
-//       };
-//     });
-//   };
-
-
 
   useEffect(() => {
     if (!currentMusic) return;

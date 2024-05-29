@@ -1,6 +1,7 @@
 import { getRandMusics } from "@/api"
-import { SearchInputBar } from "@/components"
+import { MusicFooter, SearchInputBar } from "@/components"
 import MusicItem from "@/components/MusicItem"
+import useMusicAudio from "@/hooks/useAudio"
 import useMusicPlayer from "@/hooks/useMusicPlayer"
 import { Music } from "@/type"
 import { FlashList } from "@shopify/flash-list"
@@ -16,7 +17,8 @@ const TitleDict = {
 }
 const Page = () => {
     const { top } = useSafeAreaInsets()
-    const {play,playingUrl } = useMusicPlayer()
+    const { audio,changeMusicInfo,musicInfo,playMusic} = useMusicAudio()
+
     const [musics, setMusics] = useState<Music[]>()
     const [title, setTitle] = useState<keyof typeof TitleDict>('hot')
     const initMusics = async () => {
@@ -24,25 +26,31 @@ const Page = () => {
         console.log(musicsR)
         setMusics(musicsR.map(i => i.data))
     }
-    const onDetail = (id: string) => { }
+    const onDetail = () => { }
     const togglePlay = (data: { url: string, isPlaying: boolean }) => { 
         const { url, isPlaying } = data
         const cMusic = musics?.find(i => i.url === url) 
-        if(cMusic)play(cMusic)
+        if(cMusic)playMusic(cMusic)
     }
     useEffect(() => {
         initMusics()
     }, [])
 
-    return <View className="flex-1 bg-[#fff] px-[16px]" style={{ paddingTop: top + 12 }}>
-        <SearchInputBar placeholder="搜索音乐、歌手、专辑..." onSearch={() => { }} />
-        <Text>{ TitleDict[title]}</Text>
-        <FlashList showsVerticalScrollIndicator={false} data={musics}
-                extraData={[playingUrl]}
-                estimatedItemSize={80}
-                renderItem={({ item }) => {
-                    return <MusicItem  {...item} isPlaying={playingUrl===item.url} onTogglePlay={togglePlay} />
-                }} />
-             </View>
+    return <View className="flex-1 bg-[#fff]" style={{ paddingTop: top + 12 }}>
+        <View className="px-[16px]"><SearchInputBar placeholder="搜索音乐、歌手、专辑..." onSearch={() => { }} /></View>
+        <Text className="ml-[16px]">{ TitleDict[title]}</Text>
+        <FlashList
+            contentContainerStyle={{paddingHorizontal:16}}
+            showsVerticalScrollIndicator={false}
+            data={musics}
+            extraData={[musicInfo]}
+            estimatedItemSize={80}
+            renderItem={({ item }) => {
+                    return <MusicItem  {...item} isPlaying={musicInfo?.url===item.url} onTogglePlay={togglePlay} />
+            }} />
+        <View className="h-[80px]">
+            {musicInfo && <MusicFooter {...musicInfo} onTogglePlay={() => { }} onDetail={onDetail}/> }
+        </View>
+        </View>
 }
 export default Page
