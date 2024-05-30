@@ -11,7 +11,7 @@ const Utils = [{
     des: 'QQ音乐,网易云',
     href:'/music',
     renderItem:function () { 
-        return <Pressable className="flex-row items-center px-[12px] w-full bg-[#6EB3A0] h-full py-[8px]  rounded-[8px]" style={{
+        return <Pressable className="flex-row items-center px-[12px] w-full bg-[#6EB3A0] h-[40px] py-[8px]  rounded-[8px]" style={{
             elevation:12, shadowColor: '#000',
         }} onPress={() => { 
 
@@ -34,16 +34,3 @@ const Index = () => {
     </View>
 }
 export default Index; 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  symbol: {
-    width: 35,
-    height: 35,
-    margin: 5,
-  },
-});

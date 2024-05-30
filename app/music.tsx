@@ -17,20 +17,23 @@ const TitleDict = {
 }
 const Page = () => {
     const { top } = useSafeAreaInsets()
-    const { audio,changeMusicInfo,musicInfo,playMusic} = useMusicAudio()
+    const { musicInfo,playMusic,} = useMusicAudio()
 
     const [musics, setMusics] = useState<Music[]>()
     const [title, setTitle] = useState<keyof typeof TitleDict>('hot')
     const initMusics = async () => {
         const musicsR = await getRandMusics(5)
-        console.log(musicsR)
+   
         setMusics(musicsR.map(i => i.data))
     }
     const onDetail = () => { }
     const togglePlay = (data: { url: string, isPlaying: boolean }) => { 
         const { url, isPlaying } = data
         const cMusic = musics?.find(i => i.url === url) 
-        if(cMusic)playMusic(cMusic)
+        if(cMusic)playMusic(cMusic) 
+
+
+        
     }
     useEffect(() => {
         initMusics()
@@ -46,10 +49,10 @@ const Page = () => {
             extraData={[musicInfo]}
             estimatedItemSize={80}
             renderItem={({ item }) => {
-                    return <MusicItem  {...item} isPlaying={musicInfo?.url===item.url} onTogglePlay={togglePlay} />
+                    return <MusicItem  {...item} isPlaying={musicInfo?.isPlaying && musicInfo.playingUrl === item.url} onTogglePlay={togglePlay} />
             }} />
         <View className="h-[80px]">
-            {musicInfo && <MusicFooter {...musicInfo} onTogglePlay={() => { }} onDetail={onDetail}/> }
+            {musicInfo.playingUrl && <MusicFooter {...musicInfo} onTogglePlay={() => { }} onDetail={onDetail}/> }
         </View>
         </View>
 }

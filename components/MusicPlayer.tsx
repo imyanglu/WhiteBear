@@ -97,7 +97,7 @@ const MusicPlayer = () => {
 
     const playEnded = useLast(async () => {
       const songs = musicsAtom.songs
-  songs.delete(musicsAtom.playingUrl)
+    songs.delete(musicsAtom.playingUrl)
     if (!songs.keys().next().value) {
       try {
         await audio.unloadAsync();

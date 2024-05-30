@@ -5,9 +5,10 @@ import { Slot, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
-import { Text } from 'react-native';
+import { SafeAreaView, Text } from 'react-native';
 import { MusicPlayer } from '@/components';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { MusicPlayerProvider } from '@/Context/MusicAudioContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -49,14 +50,17 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <GestureHandlerRootView>
-      <Stack screenOptions={{headerShown: false}}>
-        <Slot />
-      </Stack>
-      <MusicPlayer/>
- </GestureHandlerRootView>
-  
-    </ThemeProvider>
+    <SafeAreaView className='flex-1 bg-black'>
+     
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <GestureHandlerRootView>
+          <Stack screenOptions={{headerShown:false}}>
+             <Slot />
+       </Stack>
+     
+      </GestureHandlerRootView>
+      </ThemeProvider>
+
+    </SafeAreaView>
   );
 }

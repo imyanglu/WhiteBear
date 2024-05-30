@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react"
-import {  Audio } from 'expo-av';
+import { useContext, useEffect, useRef, useState } from "react"
+import {  Audio ,AVPlaybackStatusSuccess} from 'expo-av';
 import { Music } from "@/type";
+import { MusicAudioContext } from "@/Context/MusicAudioContext";
 
 export type MusicInfo = {
     artistsname: string;
@@ -11,40 +12,42 @@ export type MusicInfo = {
 }
 
 const useMusicAudio = () => {
-    const audioRef = useRef(new Audio.Sound()).current
-    const [musicInfo, setMusicInfo] = useState<MusicInfo>()
-    const changeMusicInfo = setMusicInfo
+    const [{music,audio},setMusic] = useContext(MusicAudioContext)
+    const changeMusicInfo = setMusic
     const playMusic = async (m: Music) => {
-        setMusicInfo({
-            ...m,isPlaying:true
-        }) 
-        try { await audioRef.unloadAsync(); } catch (err) {
-
+        const songs = music?.songs ?? []
+        const currentSong = songs.find(s => s.url === m.url)
+        if (!currentSong) songs.push(m)
+        try { await audio.unloadAsync(); } catch (err) {
         }
         finally { 
-        await audioRef.loadAsync({ uri: m.url }, { shouldPlay: true })
+            await audio.loadAsync({ uri: m.url }, { shouldPlay: true }).then(data => { })
+            setMusic({ songs:songs,isPlaying:true,playingUrl:m.url })
         }
-       
-     
     }
+    const removeMusic = (url: string) => {
+        const songs = music.songs.filter(i => i.url !== url)
+        setMusic({ ...music, songs: songs })
+     }
     const pause = async() => { 
-          await audioRef.stopAsync();
+        await audio.stopAsync();
+        setMusic(p => ({...p,isPlaying:false}))
     }
+
     useEffect(() => {
-        Audio.setAudioModeAsync({
+    Audio.setAudioModeAsync({
       staysActiveInBackground: true,
-    });
+    }); 
     }, [])
-    useEffect(() => { 
-       
-    },[musicInfo])
+ 
     
     return {
-        audio: audioRef,
-        musicInfo,
+        audio: audio,
+        musicInfo:music,
         playMusic,
         pause,
-        changeMusicInfo
+        changeMusicInfo,
+        removeMusic
     }
  }
 
