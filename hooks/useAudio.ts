@@ -20,14 +20,12 @@ const useMusicAudio = () => {
         const s = await audio.getStatusAsync();
         if(!s.isLoaded) return
         await audio.setPositionAsync(s.positionMillis)
-        console.log(s.positionMillis,'ooo',s)
         await audio.playAsync()
     }
     const playMusic = async (m: Music) => {
         const songs = music?.songs ?? []
         const currentSong = songs.find(s => s.url === m.url)
         if (!currentSong) { songs.push(m) }
-
         setMusic(p => ({ ...p, songs: songs, status: 'loading', playingUrl: m.url }))
         if (m.url !== music.playingUrl) {
             await audio.loadAsync({ uri: m.url }, { shouldPlay: true })

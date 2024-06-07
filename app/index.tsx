@@ -7,8 +7,8 @@ import { router } from 'expo-router';
 
 const Utils = [{
     key: 'music',
-    label: "音乐",
-    des: 'QQ音乐,网易云',
+    label: "随机音乐",
+    des: '网易云',
     href:'/music',
     renderItem:function () { 
         return <Pressable className="flex-row items-center px-[12px] w-full bg-[#6EB3A0] h-[40px] py-[8px]  rounded-[8px]" style={{

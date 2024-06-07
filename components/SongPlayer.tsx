@@ -15,14 +15,11 @@ const SongPlayer = () => {
         Audio.setAudioModeAsync({
             staysActiveInBackground: true,
         });
+       
         audio._onPlaybackStatusUpdate = (status) => {
-            const s = status as AVPlaybackStatusSuccess
-            console.log(s)
-            if (status.didJustFinish) {
-                console.log('playOver')
-                 nextSongs.current()
-            }
+          
         }
+    
     },[])
     
     return <View></View>
