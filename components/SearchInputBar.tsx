@@ -50,7 +50,7 @@ const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
         />
         {isSearching ? (
           <View className="w-[38px] pl-[8px]">
-            <ActivityIndicator color="#4bb3e9" size={30} />
+            <ActivityIndicator color="#4bb3e9" size={24} />
           </View>
         ) : (
           <Animated.View style={buttonAnimatedStyle}>

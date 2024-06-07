@@ -9,6 +9,7 @@ import { SafeAreaView, Text } from 'react-native';
 import { MusicPlayer } from '@/components';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MusicPlayerProvider } from '@/Context/MusicAudioContext';
+import SongPlayer from '@/components/SongPlayer';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -51,15 +52,16 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   return (
     <SafeAreaView className='flex-1 bg-black'>
-     
+      <MusicPlayerProvider> 
+      <SongPlayer />
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <GestureHandlerRootView>
           <Stack screenOptions={{headerShown:false}}>
              <Slot />
        </Stack>
-     
       </GestureHandlerRootView>
       </ThemeProvider>
+   </MusicPlayerProvider>
 
     </SafeAreaView>
   );
